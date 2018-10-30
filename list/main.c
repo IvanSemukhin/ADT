@@ -2,61 +2,53 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define N_SIZE 45
+#include "list.h"
+
 #define BASE_TEN 10
 
-struct person{
-    char name[N_SIZE];
-    int age;
-    struct person * next;
-};
-
+void showPerson(Item item);
 char * s_gets(char* str, int n);
 
 int main(void)
 {
     char convert[N_SIZE];
-    char input[N_SIZE];
     char * tmpCh;
-    struct person * head = NULL;
-    struct person * previous = NULL;
-    struct person * current = NULL;
 
-    puts("Enter first name or empty string to exit");
-    while (s_gets(input, N_SIZE) && input[0] != '\0'){
-        current = (struct person*)malloc(sizeof(struct person));
+    List info;
+    Item input;
+    InitList(&info);
 
-        if (!head)
-            head = current;
-        else
-            previous->next = current;
-
-        current->next = NULL;
-        strcpy(current->name, input);
-        puts("Enter age");
-        fgets(convert, N_SIZE, stdin);
-        current->age = strtol(convert, &tmpCh, BASE_TEN);
-
-        puts("Enter next name or empty string to exit");
-        previous = current;
+    if (ListIsFull(&info)){
+        puts("No empty memory!");
+        exit(1);
     }
 
-    if (!head)
+    puts("Enter first name or empty string to exit");
+    while (s_gets(input.name, N_SIZE) && input.name[0] != '\0'){
+        puts("Enter age");
+        fgets(convert, N_SIZE, stdin);
+        input.age = strtol(convert, &tmpCh, BASE_TEN);
+
+        if (AddItem(input, &info) == false){
+            puts("No available memory!");
+            break;
+        }
+
+        if (ListIsFull(&info)){
+            puts("List is full!");
+            break;
+        }
+
+        puts("Enter next name or empty string to exit");
+    }
+
+    if (ListIsEmpty(&info))
         puts("No data");
     else
         puts("List of data:");
-
-    current = head;
-    while (current){
-        printf("Name:[%s] age[%d]\n", current->name, current->age);
-        current = current->next;
-    }
-
-    while (head){
-        current = head;
-        head = current->next;
-        free(current);
-    }
+    Traverse(&info, showPerson);
+    printf("Entered [%d] data\n", ListItemCount(&info));
+    EmptyList(&info);
 
     puts("Program end.");
     return 0;
@@ -77,4 +69,9 @@ char * s_gets(char* str, int n)
                 continue;
     }
     return ret_val;
+}
+
+void showPerson(Item item)
+{
+    printf("Name:[%s] age:[%d]\n", item.name, item.age);
 }
